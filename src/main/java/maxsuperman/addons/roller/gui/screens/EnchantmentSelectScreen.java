@@ -1,6 +1,7 @@
 package maxsuperman.addons.roller.gui.screens;
 
-import maxsuperman.addons.roller.modules.VillagerRoller;
+import maxsuperman.addons.roller.model.RollingEnchantment;
+import maxsuperman.addons.roller.util.EnchantmentUtils;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
@@ -13,6 +14,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.EnchantmentTags;
 import net.minecraft.util.Identifier;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,20 +22,18 @@ import java.util.List;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class EnchantmentSelectScreen extends WindowScreen {
-    private final GuiTheme theme;
     private final EnchantmentSelectCallback callback;
     private String filterText = "";
     private final boolean onlyTradeable;
 
-    public EnchantmentSelectScreen(GuiTheme theme, boolean onlyTradeable, EnchantmentSelectCallback callback) {
+    public EnchantmentSelectScreen(@NonNull GuiTheme theme, boolean onlyTradeable, @NonNull EnchantmentSelectCallback callback) {
         super(theme, "Select enchantment");
-        this.theme = theme;
         this.callback = callback;
         this.onlyTradeable = onlyTradeable;
     }
 
     public interface EnchantmentSelectCallback {
-        void selection(VillagerRoller.RollingEnchantment e);
+        void selection(RollingEnchantment e);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class EnchantmentSelectScreen extends WindowScreen {
             if (idtext.isEmpty()) return;
             Identifier id = Identifier.tryParse(cc.get());
             if (id == null) return;
-            callback.selection(new VillagerRoller.RollingEnchantment(id, 0, 0, true));
+            callback.selection(new RollingEnchantment(id, 0, 0, true));
             close();
         };
 
@@ -66,7 +66,7 @@ public class EnchantmentSelectScreen extends WindowScreen {
         fillTable(table);
     }
 
-    private void fillTable(WTable table) {
+    private void fillTable(@NonNull WTable table) {
         if (mc.world == null) {
             return;
         }
@@ -87,7 +87,7 @@ public class EnchantmentSelectScreen extends WindowScreen {
             table.add(theme.label(Names.get(e))).expandCellX();
             WButton a = table.add(theme.button("Select")).widget();
             a.action = () -> {
-                callback.selection(new VillagerRoller.RollingEnchantment(reg.getId(e.value()), e.value().getMaxLevel(), VillagerRoller.getMinimumPrice(e), true));
+                callback.selection(new RollingEnchantment(reg.getId(e.value()), e.value().getMaxLevel(), EnchantmentUtils.getMinimumPrice(e), true));
                 close();
             };
             table.row();
